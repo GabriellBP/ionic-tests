@@ -7,5 +7,29 @@
 </ion-header>
 
 <ion-content padding>
-  <button ion-button (click)="takePhoto()">Take Photo</button>
+  <ion-fab right bottom>
+    <button ion-fab color="light">
+      <ion-icon name="cloud-upload"></ion-icon>
+    </button>
+    <ion-fab-list side="top">
+      <button ion-fab (click)="takePicture(this.camera.PictureSourceType.CAMERA)"><ion-icon name="camera"></ion-icon></button>
+      <button ion-fab (click)="takePicture(this.camera.PictureSourceType.PHOTOLIBRARY)"><ion-icon name="images"></ion-icon></button>
+    </ion-fab-list>
+  </ion-fab>
+
+  <ion-card *ngFor="let image of images | async">
+    <ion-card-header>
+      {{image.created | date: 'medium'}}
+    </ion-card-header>
+    <ion-card-content>
+      <button ion-button block icon-left outline (click)="viewImage()">
+        <ion-icon name="eye"></ion-icon>
+        {{image.fullPath}}
+      </button>
+      <button ion-button block icon-only outline (click)="deleteImage(image)">
+        <ion-icon name="trash"></ion-icon>
+      </button>
+      <img [src]=image.url />
+    </ion-card-content>
+  </ion-card>
 </ion-content>
