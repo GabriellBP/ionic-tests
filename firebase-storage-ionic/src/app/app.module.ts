@@ -15,12 +15,14 @@ import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { DataProvider } from '../providers/data/data';
 import {FIREBASE_CONFIG} from "./firebase.config";
 import {TestsPage} from "../pages/tests/tests";
+import {ProgressBarComponent} from "../components/progress-bar/progress-bar";
 
 @NgModule({
   declarations: [
     MyApp,
     HomePage,
-    TestsPage
+    TestsPage,
+    ProgressBarComponent
   ],
   imports: [
     BrowserModule,
