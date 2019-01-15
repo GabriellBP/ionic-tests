@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { map } from 'rxjs/operators';
 import {AngularFireDatabase} from 'angularfire2/database';
 import {AngularFireStorage} from 'angularfire2/storage';
 
@@ -12,25 +13,19 @@ export class DataProvider {
     let ref = this.db.list('images');
 
     return ref.snapshotChanges()
-      .map(changes => {
-        return changes.map(c => ({key: c.payload.key, ...c.payload.val()}))
-      });
+      .pipe(map(data => {
+        return data.map(d => ({key: d.payload.key, ...d.payload.val()}))
+      }));
   }
 
-  uploadToStorage(image) {
-    let newName = `camera/${new Date().getTime()}.jpeg`;
+  uploadToStorage(image, newName) {
+    let ref = this.afStorage.ref(newName);
 
-    return this.afStorage.ref(newName).putString(image, 'data_url');
+    return [ref, ref.putString(image, 'data_url')];
+    // return [this.afStorage.upload(newName, image), this.afStorage.ref(newName)];
   }
 
-  storeInfoToDatabase(metainfo) {
-    let toSave = {
-      created: metainfo.timeCreated,
-      url: metainfo.downloadURLs[0],
-      fullPath: metainfo.fullPath,
-      contentType: metainfo.contentType
-    };
-
+  storeInfoToDatabase(toSave) {
     return this.db.list('images').push(toSave);
   }
 

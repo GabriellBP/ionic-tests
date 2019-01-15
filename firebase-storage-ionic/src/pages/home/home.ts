@@ -3,6 +3,7 @@ import {ToastController} from 'ionic-angular';
 import {Camera, CameraOptions, PictureSourceType} from '@ionic-native/camera';
 import {Observable} from "rxjs";
 import {DataProvider} from "../../providers/data/data";
+import {finalize} from 'rxjs/operators';
 
 @Component({
   selector: 'page-home',
@@ -10,6 +11,8 @@ import {DataProvider} from "../../providers/data/data";
 })
 export class HomePage {
   images: Observable<any[]>;
+  downloadURL: Observable<string>;
+  uploadPercent: Observable<number>;
 
   constructor(private camera: Camera, //https://ionicframework.com/docs/native/camera/
               public toastCtrl: ToastController,
@@ -19,32 +22,38 @@ export class HomePage {
   }
 
   uploadImage(image) {
-    let uploadTask = this.dataProvider.uploadToStorage(image);
-    uploadTask.task.on('state_changed',
-      (snapshot) => {},
-      () => {},
-    () => {}
-    );
+    const dateNow = new Date().getTime();
+    let newName = `images/${dateNow}.jpeg`;
+    const upload = this.dataProvider.uploadToStorage(image, newName);
+    let ref = upload[0];
+    let task = upload[1];
 
-    uploadTask.then().then(res => {
-      this.dataProvider.storeInfoToDatabase(res.metadata).then(() => {
-        let toast = this.toastCtrl.create({
-          message: 'New Image added!',
-          duration: 3000
+    // @ts-ignore
+    this.uploadPercent = task.percentageChanges();
+
+    // @ts-ignore
+    task.snapshotChanges().pipe(
+      finalize(() => {
+        // @ts-ignore
+        this.downloadURL = ref.getDownloadURL();
+        this.downloadURL.subscribe(url=> {
+          let toSave = {
+                created: dateNow,
+                url: url,
+                fullPath: newName
+              };
+              let store = this.dataProvider.storeInfoToDatabase(toSave);
+              store.then(() => {
+                let toast = this.toastCtrl.create({
+                  message: 'New Image added!',
+                  duration: 3000
+                });
+                toast.present();
+              }, () => alert('error'));
         });
-        toast.present();
-      });
-    });
-  }
+      })
+    ).subscribe();
 
-  deleteImage(image) {
-    this.dataProvider.deleteImage(image).subscribe(() => {
-      let toast = this.toastCtrl.create({
-        message: 'Image removed!',
-        duration: 3000
-      });
-      toast.present();
-    })
   }
 
   // SourceType: Set the source of the picture. Defined in Camera.PictureSourceType. Default is CAMERA. PHOTOLIBRARY : 0, CAMERA : 1, SAVEDPHOTOALBUM : 2
@@ -52,7 +61,7 @@ export class HomePage {
     try {
       // defining camera options
       const options: CameraOptions = {
-        quality: 70,
+        quality: 60,
         destinationType: this.camera.DestinationType.DATA_URL, // DATA_URL can be very memory intensive and cause app crashes or out of memory errors. Use FILE_URI or NATIVE_URI if possible
         sourceType: sourceType,
         allowEdit: true, // Allow simple editing of image before selection. Cut image for example.
@@ -66,10 +75,10 @@ export class HomePage {
       };
 
       const result = await this.camera.getPicture(options);
-      alert(result);
+
       const image = `data:image/jpeg;base64,${result}`;
 
-      this.uploadImage(image);
+      await this.uploadImage(image);
 
     } catch (e) {
       alert(e);
