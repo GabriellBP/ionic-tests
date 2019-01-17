@@ -56,6 +56,16 @@ export class HomePage {
 
   }
 
+  deleteImage(image) {
+    let task = this.dataProvider.deleteImage(image).subscribe(() => {
+      let toast = this.toastCtrl.create({
+        message: 'Image removed!',
+        duration: 3000
+      });
+      toast.present();
+    });
+  }
+
   // SourceType: Set the source of the picture. Defined in Camera.PictureSourceType. Default is CAMERA. PHOTOLIBRARY : 0, CAMERA : 1, SAVEDPHOTOALBUM : 2
   async takePicture(sourceType: PictureSourceType) {
     try {

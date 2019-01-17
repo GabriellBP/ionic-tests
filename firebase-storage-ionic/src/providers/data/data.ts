@@ -30,6 +30,7 @@ export class DataProvider {
   }
 
   deleteImage(image) {
+    console.log(image)
     let key = image.key;
     let storagePath = image.fullPath;
 
