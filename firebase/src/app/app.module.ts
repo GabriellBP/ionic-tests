@@ -16,6 +16,8 @@ import { DataProvider } from '../providers/data/data';
 import {FIREBASE_CONFIG} from "./firebase.config";
 import {TestsPage} from "../pages/tests/tests";
 import {ProgressBarComponent} from "../components/progress-bar/progress-bar";
+import { File } from "@ionic-native/file";
+
 
 @NgModule({
   declarations: [
@@ -40,6 +42,7 @@ import {ProgressBarComponent} from "../components/progress-bar/progress-bar";
   providers: [
     StatusBar,
     SplashScreen,
+    File,
     Camera,
     ImagePicker,
     Crop,

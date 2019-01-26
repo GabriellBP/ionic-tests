@@ -18,11 +18,35 @@ export class DataProvider {
       }));
   }
 
-  uploadToStorage(image, newName) {
-    let ref = this.afStorage.ref(newName);
+  uploadToStorage(image, name) {
+    let ref = this.afStorage.ref(name);
 
     return [ref, ref.putString(image, 'data_url')];
     // return [this.afStorage.upload(newName, image), this.afStorage.ref(newName)];
+  }
+
+  uploadToFirebase(_imageBlobInfo, path) {
+    return new Promise((resolve, reject) => {
+      let fileRef = this.afStorage.ref(path + _imageBlobInfo.fileName);
+      let uploadTask = fileRef.put(_imageBlobInfo.imgBlob);
+      uploadTask.task.on(
+        "state_changed",
+        (_snap: any) => {
+          alert(
+            "progess " +
+            (_snap.bytesTransferred / _snap.totalBytes) * 100
+          );
+        },
+        _error => {
+          alert(_error);
+          reject(_error);
+        },
+        () => {
+          // completion...
+          resolve(uploadTask.task.snapshot);
+        }
+      );
+    });
   }
 
   storeInfoToDatabase(toSave) {
@@ -30,7 +54,6 @@ export class DataProvider {
   }
 
   deleteImage(image) {
-    console.log(image)
     let key = image.key;
     let storagePath = image.fullPath;
 
