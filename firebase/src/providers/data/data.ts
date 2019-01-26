@@ -18,11 +18,17 @@ export class DataProvider {
       }));
   }
 
-  uploadToStorage(image, name) {
+  uploadStringToStorage(image, name) {
     let ref = this.afStorage.ref(name);
 
     return [ref, ref.putString(image, 'data_url')];
-    // return [this.afStorage.upload(newName, image), this.afStorage.ref(newName)];
+  }
+
+  uploadBlobToStorage(_imageBlob, newName) {
+    let fileRef = this.afStorage.ref(newName);
+    let uploadTask = fileRef.put(_imageBlob);
+
+    return [fileRef, uploadTask];
   }
 
   uploadToFirebase(_imageBlobInfo, path) {

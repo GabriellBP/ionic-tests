@@ -11,7 +11,6 @@ import { File } from "@ionic-native/file";
   templateUrl: 'home.html'
 })
 export class HomePage {
-  result;
   images: Observable<any[]>;
   downloadURL: Observable<string>;
   uploadPercent: Observable<number>;
@@ -27,7 +26,8 @@ export class HomePage {
   uploadImage(image) {
     const dateNow = new Date().getTime();
     let newName = `images/${dateNow}.jpeg`;
-    const upload = this.dataProvider.uploadToStorage(image, newName);
+    // const upload = this.dataProvider.uploadStringToStorage(image, newName);
+    const upload = this.dataProvider.uploadBlobToStorage(image, newName);
     let ref = upload[0];
     let task = upload[1];
 
@@ -149,8 +149,11 @@ export class HomePage {
     try {
       let cameraInfo = await this.camera.getPicture(options);
       let blobInfo = await this.makeFileIntoBlob(cameraInfo);
-      let uploadInfo: any = await this.dataProvider.uploadToFirebase(blobInfo, 'images/');
-      alert("File Upload Success " + uploadInfo.fileName);
+      // let uploadInfo: any = await this.dataProvider.uploadToFirebase(blobInfo, 'images/');
+      // alert("File Upload Success " + uploadInfo.fileName);
+      // @ts-ignore
+      let uploadInfo: any = await this.uploadImage(blobInfo.imgBlob);
+      alert("File Upload Success");
     }catch (e) {
       alert("File Upload Error " + e.message);
     }
