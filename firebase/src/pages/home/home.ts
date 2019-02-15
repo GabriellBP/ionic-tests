@@ -1,16 +1,22 @@
 import { Component } from '@angular/core';
-import {ToastController} from 'ionic-angular';
+import {Platform, ToastController} from 'ionic-angular';
 import {Camera, CameraOptions, PictureSourceType} from '@ionic-native/camera';
 import {Observable} from "rxjs";
 import {DataProvider} from "../../providers/data/data";
 import {finalize} from 'rxjs/operators';
 import { File } from "@ionic-native/file";
+import {RecoveryProvider} from "../../providers/recovery/recovery";
+import {SplashScreen} from "@ionic-native/splash-screen";
+import {BackgroundMode} from "@ionic-native/background-mode/ngx";
+import {FilePath} from "@ionic-native/file-path/ngx";
 
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
 })
 export class HomePage {
+  imgURI: any;
+  anotherField = 'test';
   images: Observable<any[]>;
   downloadURL: Observable<string>;
   uploadPercent: Observable<number>;
@@ -18,9 +24,45 @@ export class HomePage {
   constructor(private camera: Camera, //https://ionicframework.com/docs/native/camera/
               public toastCtrl: ToastController,
               private dataProvider: DataProvider,
-              private file: File) {
+              private file: File,
+              private filePath: FilePath,
+              private recoveryProvider: RecoveryProvider,
+              private platform: Platform,
+              private splashScreen: SplashScreen,
+              private backgroundMode: BackgroundMode) {
 
     this.images = this.dataProvider.getImages();
+  }
+
+  ionViewDidEnter() {
+    this.splashScreen.hide();
+  }
+
+  ionViewWillEnter() {
+    if (this.recoveryProvider.pendingResult && this.recoveryProvider.pendingResult !== '') {
+      this.imgURI = this.recoveryProvider.pendingResult;
+      alert('recuperou');
+      alert(this.imgURI);
+      this.recoveryProvider.getStateRecovery().then((result: string) => {
+        alert(result);
+
+        this.recoveryProvider.removeStateRecovery().then(() => {
+          // Cool
+        });
+      });
+    }
+  }
+
+  private saveForRecovery(): Promise<{}> {
+    return new Promise((resolve) => {
+      if (this.platform.is('android')) {
+        this.recoveryProvider.saveStateRecovery(this.anotherField).then(() => {
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
   }
 
   uploadImage(image) {
@@ -71,31 +113,39 @@ export class HomePage {
 
   // SourceType: Set the source of the picture. Defined in Camera.PictureSourceType. Default is CAMERA. PHOTOLIBRARY : 0, CAMERA : 1, SAVEDPHOTOALBUM : 2
   async takePicture(sourceType: PictureSourceType) {
-    try {
-      // defining camera options
-      const options: CameraOptions = {
-        quality: 80,
-        destinationType: this.camera.DestinationType.DATA_URL, // DATA_URL can be very memory intensive and cause app crashes or out of memory errors. Use FILE_URI or NATIVE_URI if possible
-        sourceType: sourceType,
-        allowEdit: true, // Allow simple editing of image before selection. Cut image for example.
-        encodingType: this.camera.EncodingType.JPEG,
-        targetWidth: 720,
-        targetHeight: 480,
-        mediaType: this.camera.MediaType.PICTURE,
-        correctOrientation: true,
-        saveToPhotoAlbum: true,
-        cameraDirection: this.camera.Direction.BACK
-      };
+    document.addEventListener('deviceready', function () {
+      // @ts-ignore
+      cordova.plugins.backgroundMode.enable();
+    }, false);
+    // this.saveForRecovery().then(async () => {
+      try {
+        // defining camera options
+        const options: CameraOptions = {
+          quality: 80,
+          destinationType: this.camera.DestinationType.DATA_URL, // DATA_URL can be very memory intensive and cause app crashes or out of memory errors. Use FILE_URI or NATIVE_URI if possible
+          sourceType: sourceType,
+          allowEdit: true, // Allow simple editing of image before selection. Cut image for example.
+          encodingType: this.camera.EncodingType.JPEG,
+          targetWidth: 720,
+          targetHeight: 480,
+          mediaType: this.camera.MediaType.PICTURE,
+          correctOrientation: true,
+          saveToPhotoAlbum: true,
+          cameraDirection: this.camera.Direction.BACK
+        };
 
-      const result = await this.camera.getPicture(options);
+        const result = await this.camera.getPicture(options);
 
-      const image = `data:image/jpeg;base64,${result}`;
+        this.imgURI = `data:image/jpeg;base64,${result}`;
 
-      await this.uploadImage(image);
+        await this.uploadImage(this.imgURI);
 
-    } catch (e) {
-      alert(e);
-    }
+      } catch (e) {
+        alert(e);
+      }
+    // });
+    // @ts-ignore
+    cordova.plugins.backgroundMode.disable();
   }
 
   // FILE STUFF
@@ -131,10 +181,14 @@ export class HomePage {
     });
   }
 
-  async takePictureWithFILR_URI(sourceType: PictureSourceType) {
+  async takePictureWithFILE_URI(sourceType: PictureSourceType) {
+    document.addEventListener('deviceready', function () {
+      // @ts-ignore
+      cordova.plugins.backgroundMode.enable();
+    }, false);
     const options: CameraOptions = {
       quality: 80,
-      destinationType: this.camera.DestinationType.FILE_URI, // DATA_URL can be very memory intensive and cause app crashes or out of memory errors. Use FILE_URI or NATIVE_URI if possible
+      destinationType: this.camera.DestinationType.FILE_URI,
       sourceType: sourceType,
       allowEdit: true, // Allow simple editing of image before selection. Cut image for example.
       encodingType: this.camera.EncodingType.JPEG,
@@ -145,17 +199,22 @@ export class HomePage {
       saveToPhotoAlbum: true,
       cameraDirection: this.camera.Direction.BACK
     };
-
+    // this.saveForRecovery().then(async () => {
     try {
-      let cameraInfo = await this.camera.getPicture(options);
-      let blobInfo = await this.makeFileIntoBlob(cameraInfo);
+      // let cameraInfo = await this.camera.getPicture(options);
+      this.imgURI = await this.camera.getPicture(options);
+      let blobInfo = await this.makeFileIntoBlob(this.imgURI);
       // let uploadInfo: any = await this.dataProvider.uploadToFirebase(blobInfo, 'images/');
       // alert("File Upload Success " + uploadInfo.fileName);
       // @ts-ignore
       let uploadInfo: any = await this.uploadImage(blobInfo.imgBlob);
       alert("File Upload Success");
-    }catch (e) {
+    } catch (e) {
       alert("File Upload Error " + e.message);
     }
+
+    // });
+    // @ts-ignore
+    cordova.plugins.backgroundMode.disable();
   }
 }

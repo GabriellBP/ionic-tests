@@ -17,6 +17,10 @@ import {FIREBASE_CONFIG} from "./firebase.config";
 import {TestsPage} from "../pages/tests/tests";
 import {ProgressBarComponent} from "../components/progress-bar/progress-bar";
 import { File } from "@ionic-native/file";
+import { RecoveryProvider } from '../providers/recovery/recovery';
+import { IonicStorageModule } from '@ionic/storage';
+import {BackgroundMode} from '@ionic-native/background-mode/ngx';
+import { FilePath } from '@ionic-native/file-path/ngx';
 
 
 @NgModule({
@@ -31,7 +35,8 @@ import { File } from "@ionic-native/file";
     IonicModule.forRoot(MyApp),
     AngularFireModule.initializeApp(FIREBASE_CONFIG),
     AngularFireStorageModule,
-    AngularFireDatabaseModule
+    AngularFireDatabaseModule,
+    IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -46,8 +51,11 @@ import { File } from "@ionic-native/file";
     Camera,
     ImagePicker,
     Crop,
+    BackgroundMode,
+    FilePath,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    DataProvider
+    DataProvider,
+    RecoveryProvider
   ]
 })
 export class AppModule {}
