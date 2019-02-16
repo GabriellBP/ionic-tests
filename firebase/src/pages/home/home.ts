@@ -8,7 +8,6 @@ import { File } from "@ionic-native/file";
 import {RecoveryProvider} from "../../providers/recovery/recovery";
 import {SplashScreen} from "@ionic-native/splash-screen";
 import {BackgroundMode} from "@ionic-native/background-mode/ngx";
-import {FilePath} from "@ionic-native/file-path/ngx";
 
 @Component({
   selector: 'page-home',
@@ -25,7 +24,6 @@ export class HomePage {
               public toastCtrl: ToastController,
               private dataProvider: DataProvider,
               private file: File,
-              private filePath: FilePath,
               private recoveryProvider: RecoveryProvider,
               private platform: Platform,
               private splashScreen: SplashScreen,

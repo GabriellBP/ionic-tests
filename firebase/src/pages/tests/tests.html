@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-navbar color="danger">
+    <ion-title>
+      Firebase Storage
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <button ion-button (click)="takePhoto()" block>Take Photo</button>
+  <button ion-button (click)="openImagePicker()" block>Pick Image</button>
+  <button ion-button (click)="openImagePickerCrop()" block>Pick Crop Image</button>
+
+  <ion-card *ngFor="let image of images | async">
+    <ion-card-header>
+      {{image.created | date: 'medium'}}
+    </ion-card-header>
+    <ion-card-content>
+      <button ion-button block icon-left outline (click)="viewImage()">
+        <ion-icon name="eye"></ion-icon>
+        {{image.fullPath}}
+      </button>
+      <button ion-button block icon-only outline (click)="deleteImage(image)">
+        <ion-icon name="trash"></ion-icon>
+      </button>
+      <img [src]=image.url />
+    </ion-card-content>
+  </ion-card>
+</ion-content>
