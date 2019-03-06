@@ -90,10 +90,7 @@
     <plugin name="cordova-plugin-file" spec="5.0.0" />
     <plugin name="cordova-sqlite-storage" spec="^2.6.0" />
     <plugin name="cordova-plugin-background-mode" spec="^0.7.2" />
-    <plugin name="phonegap-plugin-push" spec="^2.1.3">
-        <variable name="SENDER_TO" value="you-sender-key" />
-        <variable name="FCM_VERSION" value="11.6.2" />
-    </plugin>
+    <plugin name="cordova-plugin-firebase" spec="^2.0.5" />
     <engine name="browser" spec="5.0.4" />
-    <engine name="android" spec="~7.1.1" />
+    <engine name="android" spec="7.0.0" />
 </widget>

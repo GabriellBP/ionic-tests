@@ -59,6 +59,10 @@ export class DataProvider {
     return this.db.list('images').push(toSave);
   }
 
+  storeTokenFCMToDatabase(token) {
+    return this.db.list('tokens').push(token);
+  }
+
   deleteImage(image) {
     let key = image.key;
     let storagePath = image.fullPath;

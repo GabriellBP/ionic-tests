@@ -20,7 +20,9 @@ import { File } from "@ionic-native/file";
 import { RecoveryProvider } from '../providers/recovery/recovery';
 import { IonicStorageModule } from '@ionic/storage';
 import {BackgroundMode} from '@ionic-native/background-mode/ngx';
-import {Push} from '@ionic-native/push';
+// import {Push} from '@ionic-native/push';
+import { Firebase } from '@ionic-native/firebase';
+import {FcmProvider} from "../providers/fcm/fcm";
 
 
 @NgModule({
@@ -52,7 +54,9 @@ import {Push} from '@ionic-native/push';
     ImagePicker,
     Crop,
     BackgroundMode,
-    Push,
+    Firebase,
+    FcmProvider,
+    // Push,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     DataProvider,
     RecoveryProvider
